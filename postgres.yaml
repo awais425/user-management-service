@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-management-db
+  labels:
+    app: user-management-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-management-db
+  template:
+    metadata:
+      labels:
+        app: user-management-db
+    spec:
+      containers:
+      - name: user-management-db
+        image: postgres:14-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: POSTGRES_DB
+          value: user_management
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-management-postgres
+spec:
+  selector:
+    app: user-management-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
